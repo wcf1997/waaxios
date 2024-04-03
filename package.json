@@ -1,20 +1,36 @@
 {
   "name": "waxios",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.1.0",
+  "description": "> npm intall waxios -D > pnpm add waxios -D",
   "main": "./index.js",
+  "private": false,
   "bin": {
-    "waxios": "./index.js"
+    "waxios": "index.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wcf1997/waxios.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [],
-  "author": "",
+  "author": "wcf",
   "license": "ISC",
   "dependencies": {
     "commander": "^12.0.0",
     "ejs": "^3.1.9",
     "waxios": "workspace:^"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/wcf1997/waxios/issues"
+  },
+  "homepage": "https://github.com/wcf1997/waxios#readme",
+  "directories": {
+    "lib": "lib"
+  },
+  "devDependencies": {}
 }
