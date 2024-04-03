@@ -1,6 +1,36 @@
-安装
-npm intall waxios -D
-pnpm add waxios -D
+## 安装
 
-使用
-waxios create [dirname] // dirname可选
+> npm intall waxios -D
+> pnpm add waxios -D
+
+## 创建
+
+waxios create [dirname]
+
+## 使用
+
+```typescript
+import { BaseRequest } from ".";
+import {
+  // BaseRequest,
+  BaseUrl,
+  Body,
+  Get,
+  Injectable,
+  Post,
+  Query,
+  Url
+} from "../axios/decorator";
+
+@BaseUrl("user")
+export class UserService extends BaseRequest {
+  @Post("user/test")
+  test(@Url id: number, @Query param: any, @Body data: any) {}
+}
+
+@BaseUrl("menu")
+export class MenuService extends BaseRequest {
+  @Post("menu/test")
+  test(@Url id: number, @Query param: any) {}
+}
+```
