@@ -34,3 +34,13 @@ export class MenuService extends BaseRequest {
   test(@Url id: number, @Query param: any) {}
 }
 ```
+
+## 引用
+
+```jtypescript
+
+new UserService().test(1, {type:'1'}, {name:'test'})
+new MenuService().get()
+
+
+```
