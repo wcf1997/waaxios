@@ -78,64 +78,17 @@ export function Inject(): (_constructor: any, peopertyName: string) => any {
 
 // 类装饰器
 export function BaseUrl(url: string) {
-  // const baseInstance;
   return function (_constructor: any): any {
     _constructor.prototype.baseUrl = url;
-    // _constructor.prototype.baseUrl = url;
-    // _constructor.prototype.__className__ = _constructor.name;
-    // const config = rootInject.getParams(_constructor);
-    // config.baseUrl = url;
-    // rootInject.setParams(_constructor, config);
-
-    // data.push({ baseUrl: url });
-    // console.log(_constructor, _constructor.prototype);
   };
 }
-
-// export function Query(_constructor: any, name: string, index: number) {
-//   if (!_constructor.params) {
-//     _constructor.params = {};
-//   }
-//   if (!_constructor.params[name]) {
-//     _constructor.params[name] = {
-//       params: index
-//     };
-//   } else {
-//     _constructor.params[name].params = index;
-//   }
-// }
-
-// export function Body(_constructor: any, name: string, index: number) {
-//   if (!_constructor.params) {
-//     _constructor.params = {};
-//   }
-//   if (!_constructor.params[name]) {
-//     _constructor.params[name] = {
-//       body: index
-//     };
-//   } else {
-//     _constructor.params[name].body = index;
-//   }
-// }
-
-// export function Url(_constructor: any, name: string, index: number) {
-//   if (!_constructor.params) {
-//     _constructor.params = {};
-//   }
-//   if (!_constructor.params[name]) {
-//     _constructor.params[name] = {
-//       url: index
-//     };
-//   } else {
-//     _constructor.params[name].url = index;
-//   }
-// }
 
 function collectFnParams(constructor: any, name: string, _arguments: any) {
   const requestParams: { [propName: string | number]: any } = {};
   const params = constructor.params[name].params;
   const body = constructor.params[name].body;
   const url = constructor.params[name].url;
+
   if (_arguments[params]) {
     requestParams.params = _arguments[params];
   }
@@ -146,6 +99,30 @@ function collectFnParams(constructor: any, name: string, _arguments: any) {
   if (_arguments[url]) {
     requestParams.path = _arguments[url];
   }
+  let p1 = Reflect.getMetadata(name + ":" + "params", constructor);
+  return requestParams;
+}
+function collectFnParamsForMetdata(
+  constructor: any,
+  name: string,
+  _arguments: any
+) {
+  const requestParams: { [propName: string | number]: any } = {};
+  const paramsIndex = Reflect.getMetadata(`${name}:params`, constructor);
+  const urlIndex = Reflect.getMetadata(`${name}:url`, constructor);
+  const bodyIndex = Reflect.getMetadata(`${name}:body`, constructor);
+
+  if (_arguments[paramsIndex]) {
+    requestParams.params = _arguments[paramsIndex];
+  }
+
+  if (_arguments[bodyIndex]) {
+    requestParams.data = _arguments[bodyIndex];
+  }
+  if (_arguments[urlIndex]) {
+    requestParams.path = _arguments[urlIndex];
+  }
+
   return requestParams;
 }
 
@@ -153,10 +130,15 @@ function collectFnParams(constructor: any, name: string, _arguments: any) {
 class DecoratorGenerator {
   // 方法装饰器生成器
   static createMethodsDecorator(methods: "get" | "post" | "put" | "delete") {
-    return function Get(path: string) {
+    return function (path: string) {
       return function (_constructor: any, name: string, describe: any) {
         describe.value = function () {
-          const requestParams = collectFnParams(_constructor, name, arguments);
+          const requestParams = collectFnParamsForMetdata(
+            _constructor,
+            name,
+            arguments
+          );
+
           path = requestParams.path ? `${path}/${requestParams.path}` : path;
           return _constructor[methods].call(new _constructor.constructor(), {
             ...requestParams,
@@ -169,70 +151,11 @@ class DecoratorGenerator {
 
   // 方法参数装饰器生成器
   static createParamsDecorator(type: "params" | "body" | "url") {
-    return function Url(_constructor: any, name: string, index: number) {
-      if (!_constructor.params) {
-        _constructor.params = {};
-      }
-      if (!_constructor.params[name]) {
-        _constructor.params[name] = {
-          [type]: index
-        };
-      } else {
-        _constructor.params[name][type] = index;
-      }
+    return function (_constructor: any, name: string, index: number) {
+      Reflect.defineMetadata(name + ":" + type, index, _constructor);
     };
   }
 }
-
-// 一个个定义方法
-// export function Get(path: string) {
-//   return function (_constructor: any, name: string, describe: any) {
-//     describe.value = function () {
-//       const requestParams = collectFnParams(_constructor, name, arguments);
-//       path = requestParams.path ? `${path}/${requestParams.path}` : path;
-//       return _constructor.get.call(new _constructor.constructor(), {
-//         ...requestParams,
-//         url: path
-//       });
-//     };
-//   };
-// }
-// export function Post(path: string) {
-//   return function (_constructor: any, name: string, describe: any) {
-//     describe.value = function () {
-//       const requestParams = collectFnParams(_constructor, name, arguments);
-//       path = requestParams.path ? `${path}/${requestParams.path}` : path;
-//       return _constructor.post.call(new _constructor.constructor(), {
-//         ...requestParams,
-//         url: path
-//       });
-//     };
-//   };
-// }
-// export function Delete(path: string) {
-//   return function (_constructor: any, name: string, describe: any) {
-//     describe.value = function () {
-//       const requestParams = collectFnParams(_constructor, name, arguments);
-//       path = requestParams.path ? `${path}/${requestParams.path}` : path;
-//       return _constructor.delete.call(new _constructor.constructor(), {
-//         ...requestParams,
-//         url: path
-//       });
-//     };
-//   };
-// }
-// export function Put(path: string) {
-//   return function (_constructor: any, name: string, describe: any) {
-//     describe.value = function () {
-//       const requestParams = collectFnParams(_constructor, name, arguments);
-//       path = requestParams.path ? `${path}/${requestParams.path}` : path;
-//       return _constructor.put.call(new _constructor.constructor(), {
-//         ...requestParams,
-//         url: path
-//       });
-//     };
-//   };
-// }
 
 // 使用生成器生成请求装饰器
 export const Get = DecoratorGenerator.createMethodsDecorator("get");
