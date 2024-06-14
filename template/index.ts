@@ -29,7 +29,6 @@ export abstract class BaseRequest<T = any> {
     this._axios.interceptors.request.use(
       config => {
         // const userInfo = cache.getSSCache("user") || {};
-
         // if (userInfo.tokenvalue) {
         //   config.headers[userInfo.tokenname] = userInfo.tokenvalue;
         // }
@@ -96,36 +95,52 @@ export abstract class BaseRequest<T = any> {
     );
   }
 
-  public get<T>(config?: BaseRequestConfig): Promise<AxiosResponse<T, any>> {
+  public get<T>(
+    params?: any,
+    config?: BaseRequestConfig
+  ): Promise<AxiosResponse<T, any>> {
     console.log("config", config);
 
     return this.request({
       method: "get",
       url: config?.url || this.baseUrl,
+      params,
       ...config
     });
   }
 
-  public post<T>(config?: BaseRequestConfig): Promise<AxiosResponse<T, any>> {
+  public post<T>(
+    data?: any,
+    config?: BaseRequestConfig
+  ): Promise<AxiosResponse<T, any>> {
     return this.request({
       method: "post",
       url: config?.url || this.baseUrl,
+      data,
       ...config
     });
   }
 
-  public put<T>(config?: BaseRequestConfig): Promise<AxiosResponse<T, any>> {
+  public put<T>(
+    data?: any,
+    config?: BaseRequestConfig
+  ): Promise<AxiosResponse<T, any>> {
     return this.request({
       method: "put",
       url: config?.url || this.baseUrl,
+      data,
       ...config
     });
   }
 
-  public delete<T>(config?: BaseRequestConfig): Promise<AxiosResponse<T, any>> {
+  public delete<T>(
+    data?: any,
+    config?: BaseRequestConfig
+  ): Promise<AxiosResponse<T, any>> {
     return this.request({
       method: "delete",
       url: config?.url || this.baseUrl,
+      data,
       ...config
     });
   }

@@ -1,6 +1,6 @@
 {
   "name": "waaxios",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "> npm intall waxios -D > pnpm add waxios -D",
   "main": "./index.js",
   "private": false,

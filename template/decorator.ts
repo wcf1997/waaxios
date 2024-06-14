@@ -76,6 +76,8 @@ export function Inject(): (_constructor: any, peopertyName: string) => any {
   };
 }
 
+/** 以上目前没有实际意义 */
+
 // 类装饰器
 export function BaseUrl(url: string) {
   return function (_constructor: any): any {
@@ -83,25 +85,6 @@ export function BaseUrl(url: string) {
   };
 }
 
-function collectFnParams(constructor: any, name: string, _arguments: any) {
-  const requestParams: { [propName: string | number]: any } = {};
-  const params = constructor.params[name].params;
-  const body = constructor.params[name].body;
-  const url = constructor.params[name].url;
-
-  if (_arguments[params]) {
-    requestParams.params = _arguments[params];
-  }
-
-  if (_arguments[body]) {
-    requestParams.data = _arguments[body];
-  }
-  if (_arguments[url]) {
-    requestParams.path = _arguments[url];
-  }
-  let p1 = Reflect.getMetadata(name + ":" + "params", constructor);
-  return requestParams;
-}
 function collectFnParamsForMetdata(
   constructor: any,
   name: string,
@@ -130,20 +113,26 @@ function collectFnParamsForMetdata(
 class DecoratorGenerator {
   // 方法装饰器生成器
   static createMethodsDecorator(methods: "get" | "post" | "put" | "delete") {
-    return function (path: string) {
+    return function (path: string, /** 路径拼接 */ join = true) {
       return function (_constructor: any, name: string, describe: any) {
-        describe.value = function () {
+        describe.value = function (...args: any) {
           const requestParams = collectFnParamsForMetdata(
             _constructor,
             name,
-            arguments
+            args
           );
-
-          path = requestParams.path ? `${path}/${requestParams.path}` : path;
-          return _constructor[methods].call(new _constructor.constructor(), {
-            ...requestParams,
-            url: path
-          });
+          const pathSuffix = requestParams.path ? `/${requestParams.path}` : "";
+          const apiUrl = join
+            ? `${_constructor.baseUrl}/${path}${pathSuffix}`
+            : path;
+          // path = requestParams.path ? `${path}/${requestParams.path}` : path
+          return _constructor[methods].apply(new _constructor.constructor(), [
+            {},
+            {
+              ...requestParams,
+              url: apiUrl
+            }
+          ]);
         };
       };
     };
